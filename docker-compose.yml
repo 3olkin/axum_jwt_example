@@ -1,0 +1,17 @@
+services:
+  db:
+    container_name: postgres
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_DB: axum_jwt_example
+      POSTGRES_USER: dbadmin
+      POSTGRES_PASSWORD: dbadmin
+      PGDATA: /var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data:

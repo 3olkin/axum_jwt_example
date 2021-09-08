@@ -1,0 +1,7 @@
+/target
+
+.env
+# Ignore diesel config file because only diesel cli is used
+diesel.toml
+# Ignore REST Client files
+*.http
