@@ -39,8 +39,8 @@ pub async fn login(
     let user = User::find_by_email(&input.email, &pool)
         .await
         .map_err(|_| Error::WrongCredentials)?;
-    if encryption::verify_password(input.password, user.password).await? {
-        let token = jwt::sign(user.uuid)?;
+    if encryption::verify_password(input.password, user.password.to_owned()).await? {
+        let token = tokio::task::block_in_place(|| jwt::sign(user.uuid))?;
         Ok(Json(TokenPayload {
             access_token: token,
             token_type: BEARER.to_string(),
@@ -74,7 +74,7 @@ pub async fn register(
         updated_at: Utc::now(),
     };
     let user = User::create(data, &pool).await?;
-    let token = jwt::sign(user.uuid)?;
+    let token = tokio::task::block_in_place(|| jwt::sign(user.uuid))?;
     Ok((
         StatusCode::CREATED,
         Json(TokenPayload {

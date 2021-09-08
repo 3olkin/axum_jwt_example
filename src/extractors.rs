@@ -26,7 +26,7 @@ where
         let Extension(pool) = Extension::<PgPool>::from_request(req)
             .await
             .map_err(|err| Error::from(err))?;
-        let claims = jwt::verify(&token)?;
+        let claims = tokio::task::block_in_place(|| jwt::verify(&token))?;
         Ok(User::find_by_uuid(claims.sub, &pool).await?)
     }
 }
