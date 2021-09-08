@@ -4,9 +4,8 @@ use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize, Clone, FromRow)]
 pub struct User {
-    pub id: i32,
     #[serde(skip_serializing)]
-    pub uuid: Uuid,
+    pub id: Uuid,
     pub name: String,
     pub email: String,
     #[serde(skip_serializing)]
@@ -21,7 +20,6 @@ impl User {
 
 #[derive(Debug)]
 pub struct CreateUserData {
-    pub uuid: Uuid,
     pub name: String,
     pub email: String,
     pub password: String,

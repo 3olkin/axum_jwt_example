@@ -27,6 +27,6 @@ where
             .await
             .map_err(|err| Error::from(err))?;
         let claims = jwt::verify(&token)?;
-        Ok(User::find_by_uuid(claims.sub, &pool).await?)
+        Ok(User::find_by_id(claims.sub, &pool).await?)
     }
 }

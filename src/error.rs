@@ -20,6 +20,10 @@ pub enum Error {
     ValidationError(#[from] validator::ValidationErrors),
     #[error("wrong credentials")]
     WrongCredentials,
+    #[error("email is already taken")]
+    DuplicateUserEmail,
+    #[error("name is already taken")]
+    DuplicateUserName,
 }
 pub type Result<T> = std::result::Result<T, Error>;
 
