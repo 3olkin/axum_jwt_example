@@ -12,22 +12,22 @@ pub struct Claims {
 }
 
 impl Claims {
-    pub fn new(uuid: Uuid) -> Self {
+    pub fn new(id: Uuid) -> Self {
         let iat = Utc::now();
         let exp = iat + Duration::hours(24);
 
         Self {
-            sub: uuid,
+            sub: id,
             iat: iat.timestamp(),
             exp: exp.timestamp(),
         }
     }
 }
 
-pub fn sign(uuid: Uuid) -> Result<String> {
+pub fn sign(id: Uuid) -> Result<String> {
     Ok(jsonwebtoken::encode(
         &Header::default(),
-        &Claims::new(uuid),
+        &Claims::new(id),
         &EncodingKey::from_secret(JWT_SECRET.as_bytes()),
     )?)
 }

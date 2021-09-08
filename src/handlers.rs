@@ -1,7 +1,6 @@
 use axum::{extract::Extension, http::StatusCode, Json};
 use chrono::Utc;
 use sqlx::PgPool;
-use uuid::Uuid;
 use validator::Validate;
 
 use crate::{
@@ -40,7 +39,7 @@ pub async fn login(
         .await
         .map_err(|_| Error::WrongCredentials)?;
     if encryption::verify_password(input.password, user.password).await? {
-        let token = jwt::sign(user.uuid)?;
+        let token = jwt::sign(user.id)?;
         Ok(Json(TokenPayload {
             access_token: token,
             token_type: BEARER.to_string(),
@@ -65,8 +64,14 @@ pub async fn register(
     Extension(pool): Extension<PgPool>,
 ) -> ApiResult<(StatusCode, Json<TokenPayload>)> {
     validate_payload(&input)?;
+    if User::find_by_email(&input.email, &pool).await.is_ok() {
+        return Err(Error::DuplicateUserEmail.into());
+    }
+    if User::find_by_name(&input.name, &pool).await.is_ok() {
+        return Err(Error::DuplicateUserName.into());
+    }
+
     let data = CreateUserData {
-        uuid: Uuid::new_v4(),
         name: input.name,
         email: input.email,
         password: encryption::hash_password(input.password).await?,
@@ -74,7 +79,7 @@ pub async fn register(
         updated_at: Utc::now(),
     };
     let user = User::create(data, &pool).await?;
-    let token = jwt::sign(user.uuid)?;
+    let token = jwt::sign(user.id)?;
     Ok((
         StatusCode::CREATED,
         Json(TokenPayload {
