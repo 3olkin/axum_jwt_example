@@ -6,7 +6,7 @@ use crate::config::{db::DbPool, env::PgConfig};
 
 #[async_trait]
 impl DbPool for PgPool {
-    async fn retreive() -> Self {
+    async fn retrieve() -> Self {
         let config = PgConfig::parse();
         let uri = format!(
             "postgres://{}:{}@{}:{}/{}",

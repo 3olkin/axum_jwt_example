@@ -16,7 +16,7 @@ async fn main() {
         .pretty()
         .init();
 
-    let pg_pool = sqlx::PgPool::retreive().await;
+    let pg_pool = sqlx::PgPool::retrieve().await;
     let config = config::env::ServerConfig::parse();
     let addr = SocketAddr::from((config.host, config.port));
     tracing::debug!("listening on {}", addr);
