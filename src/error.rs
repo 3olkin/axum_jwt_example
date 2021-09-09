@@ -20,6 +20,8 @@ pub enum Error {
     ValidationError(#[from] validator::ValidationErrors),
     #[error("wrong credentials")]
     WrongCredentials,
+    #[error("password doesn't match")]
+    WrongPassword,
     #[error("email is already taken")]
     DuplicateUserEmail,
     #[error("name is already taken")]

@@ -1,33 +1,26 @@
-use axum::{extract::Extension, http::StatusCode, Json};
-use chrono::Utc;
+use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
+use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
+use axum::{
+    extract::Extension,
+    http::StatusCode,
+    response::{Html, IntoResponse},
+    Json,
+};
+
 use sqlx::PgPool;
-use validator::Validate;
 
 use crate::{
+    config::r#const::BEARER,
+    dto::{LoginInput, RegisterInput, TokenPayload},
     error::{ApiResult, Error},
-    model::{CreateUserData, User},
-    utils::{encryption, jwt, validate_payload},
+    graphql::AppSchema,
+    model::User,
+    service::AuthService,
+    utils::{jwt, validate_payload},
 };
 
 pub async fn authorize(user: User) -> Json<User> {
     Json(user)
-}
-
-lazy_static! {
-    pub static ref BEARER: &'static str = "Bearer";
-}
-
-#[derive(Debug, Serialize)]
-pub struct TokenPayload {
-    pub access_token: String,
-    pub token_type: String,
-}
-
-#[derive(Debug, Deserialize, Validate)]
-pub struct LoginInput {
-    #[validate(email)]
-    pub email: String,
-    pub password: String,
 }
 
 pub async fn login(
@@ -35,28 +28,14 @@ pub async fn login(
     Extension(pool): Extension<PgPool>,
 ) -> ApiResult<Json<TokenPayload>> {
     validate_payload(&input)?;
-    let user = User::find_by_email(&input.email, &pool)
+    let user = AuthService::sign_in(input, &pool)
         .await
         .map_err(|_| Error::WrongCredentials)?;
-    if encryption::verify_password(input.password, user.password).await? {
-        let token = jwt::sign(user.id)?;
-        Ok(Json(TokenPayload {
-            access_token: token,
-            token_type: BEARER.to_string(),
-        }))
-    } else {
-        Err(Error::WrongCredentials.into())
-    }
-}
-
-#[derive(Debug, Deserialize, Validate)]
-pub struct RegisterInput {
-    #[validate(length(min = 4, max = 10))]
-    pub name: String,
-    #[validate(email)]
-    pub email: String,
-    #[validate(length(min = 6))]
-    pub password: String,
+    let token = jwt::sign(user.id)?;
+    Ok(Json(TokenPayload {
+        access_token: token,
+        token_type: BEARER.to_string(),
+    }))
 }
 
 pub async fn register(
@@ -64,21 +43,7 @@ pub async fn register(
     Extension(pool): Extension<PgPool>,
 ) -> ApiResult<(StatusCode, Json<TokenPayload>)> {
     validate_payload(&input)?;
-    if User::find_by_email(&input.email, &pool).await.is_ok() {
-        return Err(Error::DuplicateUserEmail.into());
-    }
-    if User::find_by_name(&input.name, &pool).await.is_ok() {
-        return Err(Error::DuplicateUserName.into());
-    }
-
-    let data = CreateUserData {
-        name: input.name,
-        email: input.email,
-        password: encryption::hash_password(input.password).await?,
-        created_at: Utc::now(),
-        updated_at: Utc::now(),
-    };
-    let user = User::create(data, &pool).await?;
+    let user = AuthService::sign_up(input, &pool).await?;
     let token = jwt::sign(user.id)?;
     Ok((
         StatusCode::CREATED,
@@ -87,4 +52,16 @@ pub async fn register(
             token_type: BEARER.to_string(),
         }),
     ))
+}
+
+pub async fn graphql_playground() -> impl IntoResponse {
+    Html(playground_source(GraphQLPlaygroundConfig::new("/graphql")))
+}
+
+pub async fn graphql(
+    schema: Extension<AppSchema>,
+    req: GraphQLRequest,
+    user: Option<User>,
+) -> GraphQLResponse {
+    schema.execute(req.into_inner().data(user)).await.into()
 }
