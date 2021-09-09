@@ -1,4 +1,4 @@
-use async_graphql::{Context, EmptyMutation, EmptySubscription, Result, Schema};
+use async_graphql::{Context, EmptySubscription, Result, Schema};
 
 use crate::{
     dto::{AuthPayload, LoginInput, RegisterInput},
