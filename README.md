@@ -3,6 +3,7 @@
 This repository provides an example of:
 
 - Axum REST API
+- Axum GraphQL API
 - Error handling
 - JWT authentication
 - Interaction with the database
@@ -12,7 +13,7 @@ This repository provides an example of:
 ## Required
 
 - Rust
-- Docker and docker-compose or Postgresql
+- Docker and docker-compose or Postgresql server
 
 ## Recommended
 
@@ -30,3 +31,5 @@ This repository provides an example of:
 - POST `/register` - required fields: `name, email, password`, returns bearer token
 - POST `/login` - required fields: `email, password`, returns bearer token
 - GET `/authorize` - returns user
+- GET `/graphql` - graphql playground
+- POST `/graphql` - graphql endpoint
