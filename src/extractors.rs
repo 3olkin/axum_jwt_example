@@ -19,14 +19,14 @@ where
     type Rejection = ApiError;
 
     async fn from_request(req: &mut RequestParts<B>) -> Result<Self, Self::Rejection> {
-        let token = TypedHeader::<Authorization<Bearer>>::from_request(req)
-            .await
-            .map(|TypedHeader(Authorization(bearer))| bearer.token().to_owned())
-            .map_err(|err| Error::from(err))?;
+        let TypedHeader(Authorization(bearer)) =
+            TypedHeader::<Authorization<Bearer>>::from_request(req)
+                .await
+                .map_err(|err| Error::from(err))?;
         let Extension(pool) = Extension::<PgPool>::from_request(req)
             .await
             .map_err(|err| Error::from(err))?;
-        let claims = jwt::verify(&token)?;
+        let claims = jwt::verify(bearer.token())?;
         Ok(User::find_by_id(claims.sub, &pool).await?)
     }
 }
