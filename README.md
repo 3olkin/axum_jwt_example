@@ -17,13 +17,14 @@ This repository provides an example of:
 
 ## Recommended
 
-- [Diesel CLI](https://github.com/diesel-rs/diesel/tree/master/diesel_cli) (for database migrations)
+- [Diesel CLI](https://github.com/diesel-rs/diesel/tree/master/diesel_cli) or
+  [SQLx CLI](https://github.com/launchbadge/sqlx/tree/master/sqlx-cli) (for database migrations)
 
 ## Usage
 
 - cp .env.example .env
 - docker-compose up -d
-- diesel migration run
+- diesel migration run # or sqlx migrate run
 - cargo run --release
 
 ## Api
