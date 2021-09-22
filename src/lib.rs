@@ -8,7 +8,7 @@ extern crate serde;
 use async_graphql::{EmptySubscription, Schema};
 use axum::{
     body::Body,
-    handler::{get, post},
+    handler::{get, options, post},
     http::{header, HeaderValue},
     routing::BoxRoute,
     AddExtensionLayer, Router,
@@ -59,6 +59,7 @@ pub fn app(pg_pool: PgPool) -> Router<BoxRoute> {
         .into_inner();
 
     Router::new()
+        .route("/", options(|| async {}))
         .route("/login", post(handlers::login))
         .route("/register", post(handlers::register))
         .route("/authorize", get(handlers::authorize))

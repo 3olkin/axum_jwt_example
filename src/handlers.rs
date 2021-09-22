@@ -10,7 +10,7 @@ use axum::{
 use sqlx::PgPool;
 
 use crate::{
-    config::r#const::BEARER,
+    config::constants::BEARER,
     dto::{LoginInput, RegisterInput, TokenPayload},
     error::{ApiResult, Error},
     graphql::AppSchema,
