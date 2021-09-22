@@ -4,6 +4,7 @@ This repository provides an example of:
 
 - Axum REST API
 - Axum GraphQL API
+- Axum CORS config
 - Error handling
 - JWT authentication
 - Interaction with the database
