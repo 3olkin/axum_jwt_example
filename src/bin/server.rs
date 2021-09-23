@@ -8,9 +8,7 @@ use tracing_subscriber::EnvFilter;
 async fn main() {
     use config::db::DbPool;
 
-    if dotenv::dotenv().is_err() {
-        tracing::warn!("missing .env file in current working directory");
-    };
+    dotenv::dotenv().ok();
     tracing_subscriber::fmt()
         .with_env_filter(EnvFilter::from_default_env())
         .pretty()

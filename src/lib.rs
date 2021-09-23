@@ -59,7 +59,6 @@ pub fn app(pg_pool: PgPool) -> Router<BoxRoute> {
         .into_inner();
 
     Router::new()
-        .route("/", options(|| async { /* this is cors handler */ }))
         .route("/login", post(handlers::login))
         .route("/register", post(handlers::register))
         .route("/authorize", get(handlers::authorize))
@@ -67,6 +66,7 @@ pub fn app(pg_pool: PgPool) -> Router<BoxRoute> {
             "/graphql",
             get(handlers::graphql_playground).post(handlers::graphql),
         )
+        .or(options(|| async { /* this is cors handler */ }))
         .layer(middleware_stack)
         .boxed()
 }
