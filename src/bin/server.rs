@@ -1,7 +1,7 @@
 use std::net::SocketAddr;
 
 use axum_jwt_example::config;
-use clap::Clap;
+use clap::Parser;
 use tracing_subscriber::EnvFilter;
 
 #[tokio::main]

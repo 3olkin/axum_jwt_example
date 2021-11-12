@@ -8,9 +8,8 @@ extern crate serde;
 use async_graphql::{EmptySubscription, Schema};
 use axum::{
     body::Body,
-    handler::{get, options, post},
     http::{header, HeaderValue},
-    routing::BoxRoute,
+    routing::{get, post},
     AddExtensionLayer, Router,
 };
 use sqlx::PgPool;
@@ -29,7 +28,7 @@ mod utils;
 
 pub mod config;
 
-pub fn app(pg_pool: PgPool) -> Router<BoxRoute> {
+pub fn app(pg_pool: PgPool) -> Router {
     use self::graphql::{AppSchema, MutationRoot, QueryRoot};
 
     let schema: AppSchema = Schema::build(QueryRoot, MutationRoot, EmptySubscription)
@@ -59,6 +58,7 @@ pub fn app(pg_pool: PgPool) -> Router<BoxRoute> {
         .into_inner();
 
     Router::new()
+        // .route("/*path", options(|| async { /* this is cors handler */ }))
         .route("/login", post(handlers::login))
         .route("/register", post(handlers::register))
         .route("/authorize", get(handlers::authorize))
@@ -66,7 +66,5 @@ pub fn app(pg_pool: PgPool) -> Router<BoxRoute> {
             "/graphql",
             get(handlers::graphql_playground).post(handlers::graphql),
         )
-        .or(options(|| async { /* this is cors handler */ }))
         .layer(middleware_stack)
-        .boxed()
 }
