@@ -2,7 +2,7 @@ use async_graphql::http::{playground_source, GraphQLPlaygroundConfig};
 use async_graphql_axum::{GraphQLRequest, GraphQLResponse};
 use axum::{
     extract::Extension,
-    http::{header, HeaderMap, HeaderValue, StatusCode},
+    http::StatusCode,
     response::{Html, IntoResponse},
     Json,
 };
@@ -63,26 +63,4 @@ pub async fn graphql(
     user: Option<User>,
 ) -> GraphQLResponse {
     schema.execute(req.into_inner().data(user)).await.into()
-}
-
-pub async fn cors() -> impl IntoResponse {
-    let mut headers = HeaderMap::new();
-    headers.insert(
-        header::ACCESS_CONTROL_ALLOW_ORIGIN,
-        HeaderValue::from_static("*"),
-    );
-    headers.insert(
-        header::ACCESS_CONTROL_ALLOW_METHODS,
-        HeaderValue::from_static("GET, HEAD, POST, OPTIONS"),
-    );
-    headers.insert(
-        header::ACCESS_CONTROL_ALLOW_HEADERS,
-        HeaderValue::from_static("*"),
-    );
-    headers.insert(
-        header::ACCESS_CONTROL_ALLOW_CREDENTIALS,
-        HeaderValue::from_static("true"),
-    );
-
-    headers
 }

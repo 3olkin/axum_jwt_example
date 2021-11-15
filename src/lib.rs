@@ -7,12 +7,17 @@ extern crate serde;
 
 use async_graphql::{EmptySubscription, Schema};
 use axum::{
+    http::Method,
+    response::IntoResponse,
     routing::{get, post},
     AddExtensionLayer, Router,
 };
 use sqlx::PgPool;
 use tower::ServiceBuilder;
-use tower_http::trace::TraceLayer;
+use tower_http::{
+    cors::{any, CorsLayer},
+    trace::TraceLayer,
+};
 
 mod dto;
 mod error;
@@ -35,25 +40,18 @@ pub fn app(pg_pool: PgPool) -> Router {
 
     let middleware_stack = ServiceBuilder::new()
         .layer(TraceLayer::new_for_http())
+        .layer(CorsLayer::permissive())
         .layer(AddExtensionLayer::new(schema))
         .layer(AddExtensionLayer::new(pg_pool))
         .into_inner();
 
     Router::new()
-        .route("/login", post(handlers::login).options(handlers::cors))
-        .route(
-            "/register",
-            post(handlers::register).options(handlers::cors),
-        )
-        .route(
-            "/authorize",
-            get(handlers::authorize).options(handlers::cors),
-        )
+        .route("/login", post(handlers::login))
+        .route("/register", post(handlers::register))
+        .route("/authorize", get(handlers::authorize))
         .route(
             "/graphql",
-            get(handlers::graphql_playground)
-                .post(handlers::graphql)
-                .options(handlers::cors),
+            get(handlers::graphql_playground).post(handlers::graphql),
         )
         .layer(middleware_stack)
 }
