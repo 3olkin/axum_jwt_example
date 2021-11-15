@@ -6,7 +6,6 @@ use axum::{
     response::{Html, IntoResponse},
     Json,
 };
-
 use sqlx::PgPool;
 
 use crate::{

@@ -1,5 +1,5 @@
 use axum::async_trait;
-use clap::Clap;
+use clap::Parser;
 use sqlx::{postgres::PgPoolOptions, PgPool};
 
 use crate::config::{db::DbPool, env::PgConfig};

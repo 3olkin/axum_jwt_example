@@ -7,15 +7,17 @@ extern crate serde;
 
 use async_graphql::{EmptySubscription, Schema};
 use axum::{
-    body::Body,
-    handler::{get, options, post},
-    http::{header, HeaderValue},
-    routing::BoxRoute,
+    http::Method,
+    response::IntoResponse,
+    routing::{get, post},
     AddExtensionLayer, Router,
 };
 use sqlx::PgPool;
 use tower::ServiceBuilder;
-use tower_http::{set_header::SetResponseHeaderLayer, trace::TraceLayer};
+use tower_http::{
+    cors::{any, CorsLayer},
+    trace::TraceLayer,
+};
 
 mod dto;
 mod error;
@@ -29,7 +31,7 @@ mod utils;
 
 pub mod config;
 
-pub fn app(pg_pool: PgPool) -> Router<BoxRoute> {
+pub fn app(pg_pool: PgPool) -> Router {
     use self::graphql::{AppSchema, MutationRoot, QueryRoot};
 
     let schema: AppSchema = Schema::build(QueryRoot, MutationRoot, EmptySubscription)
@@ -38,22 +40,7 @@ pub fn app(pg_pool: PgPool) -> Router<BoxRoute> {
 
     let middleware_stack = ServiceBuilder::new()
         .layer(TraceLayer::new_for_http())
-        .layer(SetResponseHeaderLayer::<_, Body>::overriding(
-            header::ACCESS_CONTROL_ALLOW_ORIGIN,
-            HeaderValue::from_static("*"),
-        ))
-        .layer(SetResponseHeaderLayer::<_, Body>::overriding(
-            header::ACCESS_CONTROL_ALLOW_METHODS,
-            HeaderValue::from_static("GET, HEAD, POST, OPTIONS"),
-        ))
-        .layer(SetResponseHeaderLayer::<_, Body>::overriding(
-            header::ACCESS_CONTROL_ALLOW_HEADERS,
-            HeaderValue::from_static("*"),
-        ))
-        .layer(SetResponseHeaderLayer::<_, Body>::overriding(
-            header::ACCESS_CONTROL_ALLOW_CREDENTIALS,
-            HeaderValue::from_static("true"),
-        ))
+        .layer(CorsLayer::permissive())
         .layer(AddExtensionLayer::new(schema))
         .layer(AddExtensionLayer::new(pg_pool))
         .into_inner();
@@ -66,7 +53,5 @@ pub fn app(pg_pool: PgPool) -> Router<BoxRoute> {
             "/graphql",
             get(handlers::graphql_playground).post(handlers::graphql),
         )
-        .or(options(|| async { /* this is cors handler */ }))
         .layer(middleware_stack)
-        .boxed()
 }

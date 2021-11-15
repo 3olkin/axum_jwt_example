@@ -1,12 +1,12 @@
 use std::{env, net::IpAddr};
 
-use clap::Clap;
+use clap::Parser;
 
 lazy_static! {
     pub static ref JWT_SECRET: String = env::var("JWT_SECRET").expect("JWT_SECRET must be set");
 }
 
-#[derive(Debug, Clap)]
+#[derive(Debug, Parser)]
 pub struct ServerConfig {
     #[clap(default_value = "127.0.0.1", env)]
     pub host: IpAddr,
@@ -14,7 +14,7 @@ pub struct ServerConfig {
     pub port: u16,
 }
 
-#[derive(Debug, Clap)]
+#[derive(Debug, Parser)]
 pub struct PgConfig {
     #[clap(required = true, env)]
     pub pg_database: String,
