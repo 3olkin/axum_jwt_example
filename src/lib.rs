@@ -7,17 +7,12 @@ extern crate serde;
 
 use async_graphql::{EmptySubscription, Schema};
 use axum::{
-    http::Method,
-    response::IntoResponse,
     routing::{get, post},
     AddExtensionLayer, Router,
 };
 use sqlx::PgPool;
 use tower::ServiceBuilder;
-use tower_http::{
-    cors::{any, CorsLayer},
-    trace::TraceLayer,
-};
+use tower_http::{cors::CorsLayer, trace::TraceLayer};
 
 mod dto;
 mod error;
