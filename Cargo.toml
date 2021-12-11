@@ -6,12 +6,12 @@ edition = "2018"
 license = "MIT"
 
 [dependencies]
-async-graphql = { version = "2.11", features = ["chrono", "uuid"] }
-async-graphql-axum = "2.11"
-axum = { version = "0.3", features = ["headers"] }
+async-graphql = { version = "3", features = ["chrono", "uuid"] }
+async-graphql-axum = "3"
+axum = { version = "0.4", features = ["headers"] }
 bcrypt = "0.10"
 chrono = { version = "0.4", features = ["serde"] }
-clap = "3.0.0-beta.5"
+clap = { version = "3.0.0-rc.4", features = ["derive", "env"] }
 dotenv = "0.15"
 headers = "0.3"
 jsonwebtoken = "7.2"
@@ -29,8 +29,8 @@ sqlx = { version = "0.5", features = [
 thiserror = "1"
 tokio = { version = "1", features = ["full"] }
 tower = { version = "0.4", features = ["full"] }
-tower-http = { version = "0.1", features = ["full"] }
+tower-http = { version = "0.2", features = ["full"] }
 tracing = "0.1"
-tracing-subscriber = "0.2"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 uuid = { version = "0.8", features = ["serde", "v4"] }
 validator = { version = "0.14", features = ["derive"] }
